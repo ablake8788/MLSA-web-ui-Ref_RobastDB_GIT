@@ -6,6 +6,7 @@ if __name__ == "__main__":
 
 #############################
 #
+
 # Key design patterns used
 # •	Application Factory: create_app() builds the app and dependencies.
 # •	Dependency Injection (manual): dependencies are passed into routes and service constructors.
