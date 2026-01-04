@@ -1,0 +1,660 @@
+# <!doctype html>
+# <html lang="en">
+# <head>
+#   <meta charset="utf-8" />
+#   <meta name="viewport" content="width=device-width,initial-scale=1" />
+#   <title>Ministry of Labour and Social Affairs / Personal Home Care of New Jersey Gap Analysis</title>
+#
+#   <style>
+#     :root{
+#       /* LIGHT GRAY THEME */
+#       --bg-app:#F3F4F6;        /* page background */
+#       --bg-surface:#FFFFFF;    /* topbar/cards */
+#       --bg-surface-2:#EEF2F7;  /* subtle surface */
+#
+#       --text-primary:#0F172A;
+#       --text-secondary:#334155;
+#       --text-muted:#64748B;
+#
+#       --border:rgba(15,23,42,0.12);
+#       --border-strong:rgba(15,23,42,0.18);
+#
+#       --focus:rgba(100,116,139,0.22);
+#       --error:#DC2626;
+#       --success:#059669;
+#
+#       --shadow: 0 14px 40px rgba(2,6,23,.10);
+#       --radius:16px;
+#       --radius-sm:12px;
+#
+#       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+#       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+#     }
+#
+#     *{box-sizing:border-box}
+#
+#     body{
+#       margin:0;
+#       font-family:var(--sans);
+#       color:var(--text-primary);
+#       background:
+#         radial-gradient(1200px 600px at 15% 0%, rgba(100,116,139,0.08), transparent 55%),
+#         radial-gradient(900px 500px at 80% 10%, rgba(100,116,139,0.05), transparent 60%),
+#         var(--bg-app);
+#       min-height:100vh;
+#     }
+#
+#     .topbar{
+#       height:56px;
+#       display:flex;
+#       align-items:center;
+#       justify-content:space-between;
+#       padding:0 16px;
+#       background:rgba(255,255,255,0.85);
+#       backdrop-filter: blur(10px);
+#       border-bottom:1px solid var(--border);
+#       position:sticky; top:0; z-index:10;
+#     }
+#
+#     .brand{display:flex; align-items:center; gap:10px; letter-spacing:.2px;}
+#
+#     .logo{
+#       width:34px; height:34px; border-radius:10px;
+#       background:linear-gradient(135deg, rgba(100,116,139,.70), rgba(100,116,139,.20));
+#       box-shadow: 0 8px 22px rgba(2,6,23,.10);
+#       border:1px solid var(--border);
+#     }
+#
+#     .brand h1{margin:0;font-size:14px;font-weight:800}
+#     .muted{color:var(--text-muted); font-size:12px}
+#
+#     .badge{
+#       font-size:12px;
+#       color:var(--text-secondary);
+#       border:1px solid var(--border);
+#       background:rgba(255,255,255,0.80);
+#       padding:6px 10px;
+#       border-radius:999px;
+#       white-space:nowrap;
+#       text-decoration:none;
+#       display:inline-flex;
+#       align-items:center;
+#       gap:8px;
+#     }
+#     .badge:hover{border-color:var(--border-strong)}
+#
+#     .container{
+#       max-width:520px;
+#       margin:0;
+#       padding:24px 0 24px 24px;  /* left only */
+#     }
+#
+#     .card{
+#       background:rgba(255,255,255,0.92);
+#       border:1px solid var(--border);
+#       border-radius:var(--radius);
+#       box-shadow:var(--shadow);
+#       overflow:hidden;
+#     }
+#
+#     .head{
+#       padding:18px 20px 14px 20px;
+#       border-bottom:1px solid var(--border);
+#       display:flex;
+#       align-items:flex-start;
+#       justify-content:space-between;
+#       gap:12px;
+#     }
+#
+#     .title{margin:0;font-size:16px;font-weight:900;letter-spacing:.2px}
+#     .subtitle{margin:6px 0 0 0;font-size:12px;color:var(--text-muted);line-height:1.4}
+#
+#     .body{padding:18px 20px 20px 20px;}
+#     .stack{display:flex; flex-direction:column; gap:14px;}
+#
+#     label{
+#       display:block;
+#       font-size:12px;
+#       font-weight:800;
+#       color:var(--text-secondary);
+#       margin-bottom:6px;
+#     }
+#
+#     input[type="text"]{
+#       width:100%;
+#       height:32px;
+#       padding:0 10px;
+#       border-radius:10px;
+#       border:1px solid var(--border-strong);
+#       background:#FFFFFF;
+#       color:var(--text-primary);
+#       outline:none;
+#       font-size:12px;
+#     }
+#
+#     input[type="text"]::placeholder{color:rgba(100,116,139,0.75)}
+#
+#     input[type="text"]:focus{
+#       border-color:rgba(100,116,139,0.45);
+#       box-shadow:0 0 0 4px var(--focus);
+#     }
+#
+#     /* Textarea styling */
+#     textarea{
+#       width:100%;
+#       min-height:90px;
+#       padding:10px;
+#       border-radius:10px;
+#       border:1px solid var(--border-strong);
+#       background:#FFFFFF;
+#       color:var(--text-primary);
+#       outline:none;
+#       font-size:12px;
+#       font-family:var(--sans);
+#       resize:vertical;
+#     }
+#
+#     textarea::placeholder{color:rgba(100,116,139,0.75)}
+#
+#     textarea:focus{
+#       border-color:rgba(100,116,139,0.45);
+#       box-shadow:0 0 0 4px var(--focus);
+#     }
+#
+#     /* NEW: select styling to match inputs */
+#     select{
+#       width:100%;
+#       height:32px;
+#       padding:0 10px;
+#       border-radius:10px;
+#       border:1px solid var(--border-strong);
+#       background:#FFFFFF;
+#       color:var(--text-primary);
+#       outline:none;
+#       font-size:12px;
+#     }
+#
+#     select:focus{
+#       border-color:rgba(100,116,139,0.45);
+#       box-shadow:0 0 0 4px var(--focus);
+#     }
+#
+#     .actions{
+#       display:flex;
+#       flex-wrap:wrap;
+#       gap:10px;
+#       margin-top:4px;
+#     }
+#
+#     button.btn{
+#       display:inline-flex;
+#       align-items:center;
+#       justify-content:center;
+#       height:40px;
+#       min-width:140px;
+#       padding:0 14px;
+#       border-radius:12px;
+#       border:1px solid var(--border-strong);
+#       text-decoration:none;
+#       font-weight:800;
+#       font-size:13px;
+#       letter-spacing:.2px;
+#       cursor:pointer;
+#       background:#E5E7EB; /* gray */
+#       color:#0F172A;
+#     }
+#     button.btn:hover{background:#D1D5DB}
+#
+#     button.primary{background:#E5E7EB}
+#     button.primary:hover{background:#D1D5DB}
+#
+#     button.secondary{
+#       background:#E5E7EB;
+#       border:1px solid var(--border-strong);
+#       color:#0F172A;
+#     }
+#     button.secondary:hover{background:#D1D5DB}
+#
+#     .callout{
+#       border:1px solid rgba(220,38,38,0.28);
+#       background:rgba(220,38,38,0.06);
+#       color:var(--text-primary);
+#       border-radius:14px;
+#       padding:12px 14px;
+#       font-size:12px;
+#       line-height:1.45;
+#     }
+#   </style>
+# </head>
+#
+# <body>
+#   <div class="topbar">
+#     <div class="brand">
+#       <div class="logo"></div>
+#       <div>
+#         <h1>Titanium Technology Gap Analysis</h1>
+#         <div class="muted">Enter inputs and run the analysis</div>
+#       </div>
+#     </div>
+#     <a class="badge" href="/">New run</a>
+#   </div>
+#
+#   <div class="container">
+#     <div class="card">
+#       <div class="head">
+#         <div>
+#           <p class="title">Run Analysis</p>
+#           <p class="subtitle">Provide a competitor domain/URL. Baseline and file are optional.</p>
+#         </div>
+#       </div>
+#
+#       <div class="body">
+#         <div class="stack">
+#
+#           {% if error %}
+#             <div class="callout">
+#               <strong>Error:</strong> {{ error }}
+#             </div>
+#           {% endif %}
+#
+#           <form method="post" action="/run">
+#             <div style="margin-bottom:12px;">
+#               <label>Primary Competitor (required)</label>
+#               <input
+#                 type="text"
+#                 name="competitor"
+#                 value="{{ competitor or '' }}"
+#                 placeholder="Ministry of Labour and Social Affairs"
+#                 required
+#               />
+#             </div>
+#
+#             <div style="margin-bottom:12px;">
+#               <label>Secondary Competitor (optional)</label>
+#               <input
+#                 type="text"
+#                 name="baseline"
+#                 value="{{ baseline or '' }}"
+#                 placeholder="leave blank to disable"
+#               />
+#             </div>
+#
+#             <!-- Instruction Preset -->
+#             <div style="margin-bottom:12px;">
+#               <label>Instruction Preset (optional)</label>
+#               <select name="instruction_preset">
+#                 <option value="">None (use free text only)</option>
+#                 <option value="scoring" {% if instruction_preset=='scoring' %}selected{% endif %}>Scoring table + differentiators</option>
+#                 <option value="executive" {% if instruction_preset=='executive' %}selected{% endif %}>Executive summary (board-ready)</option>
+#                 <option value="technical" {% if instruction_preset=='technical' %}selected{% endif %}>Technical deep-dive</option>
+#                 <option value="evidence_strict" {% if instruction_preset=='evidence_strict' %}selected{% endif %}>Evidence-strict (no inference)</option>
+#                 <option value="slide" {% if instruction_preset=='slide' %}selected{% endif %}>Slide-ready bullets</option>
+#                 <option value="risk" {% if instruction_preset=='risk' %}selected{% endif %}>Compliance + risk emphasis</option>
+#               </select>
+#             </div>
+#
+#             <!-- Additional Instructions -->
+#             <div style="margin-bottom:12px;">
+#               <label>Additional Instructions (optional)</label>
+#               <textarea
+#                 name="extra_instructions"
+#                 placeholder="Example: Include a scoring table (1–5), add an executive summary, and list top 3 differentiators."
+#               >{{ extra_instructions or '' }}</textarea>
+#             </div>
+#
+#             <!-- File (optional) -->
+#             <div style="margin-bottom:12px;">
+#               <label>File (optional)</label>
+#               <input
+#                 type="text"
+#                 name="file"
+#                 value="{{ file or '' }}"
+#                 placeholder="leave blank to auto-pick from INI"
+#               />
+#             </div>
+#
+#             <div class="actions">
+#               <button class="btn primary" type="submit" formtarget="_blank">Run Analysis</button>
+#               <button class="btn secondary" type="reset">Clear</button>
+#             </div>
+#           </form>
+#
+#         </div>
+#       </div>
+#     </div>
+#   </div>
+# </body>
+# </html>
+
+
+
+# <!doctype html>
+# <html lang="en">
+# <head>
+#   <meta charset="utf-8" />
+#   <meta name="viewport" content="width=device-width,initial-scale=1" />
+#   <title>Ministry of Labour and Social Affairs / Personal Home Care of New Jersey Gap Analysis</title>
+#
+#   <style>
+#     :root{
+#       /* LIGHT GRAY THEME */
+#       --bg-app:#F3F4F6;        /* page background */
+#       --bg-surface:#FFFFFF;    /* topbar/cards */
+#       --bg-surface-2:#EEF2F7;  /* subtle surface */
+#
+#       --text-primary:#0F172A;
+#       --text-secondary:#334155;
+#       --text-muted:#64748B;
+#
+#       --border:rgba(15,23,42,0.12);
+#       --border-strong:rgba(15,23,42,0.18);
+#
+#       --focus:rgba(100,116,139,0.22);
+#       --error:#DC2626;
+#       --success:#059669;
+#
+#       --shadow: 0 14px 40px rgba(2,6,23,.10);
+#       --radius:16px;
+#       --radius-sm:12px;
+#
+#       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+#       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+#     }
+#
+#     *{box-sizing:border-box}
+#
+#     body{
+#       margin:0;
+#       font-family:var(--sans);
+#       color:var(--text-primary);
+#       background:
+#         radial-gradient(1200px 600px at 15% 0%, rgba(100,116,139,0.08), transparent 55%),
+#         radial-gradient(900px 500px at 80% 10%, rgba(100,116,139,0.05), transparent 60%),
+#         var(--bg-app);
+#       min-height:100vh;
+#     }
+#
+#     .topbar{
+#       height:56px;
+#       display:flex;
+#       align-items:center;
+#       justify-content:space-between;
+#       padding:0 16px;
+#       background:rgba(255,255,255,0.85);
+#       backdrop-filter: blur(10px);
+#       border-bottom:1px solid var(--border);
+#       position:sticky; top:0; z-index:10;
+#     }
+#
+#     .brand{display:flex; align-items:center; gap:10px; letter-spacing:.2px;}
+#
+#     .logo{
+#       width:34px; height:34px; border-radius:10px;
+#       background:linear-gradient(135deg, rgba(100,116,139,.70), rgba(100,116,139,.20));
+#       box-shadow: 0 8px 22px rgba(2,6,23,.10);
+#       border:1px solid var(--border);
+#     }
+#
+#     .brand h1{margin:0;font-size:14px;font-weight:800}
+#     .muted{color:var(--text-muted); font-size:12px}
+#
+#     .badge{
+#       font-size:12px;
+#       color:var(--text-secondary);
+#       border:1px solid var(--border);
+#       background:rgba(255,255,255,0.80);
+#       padding:6px 10px;
+#       border-radius:999px;
+#       white-space:nowrap;
+#       text-decoration:none;
+#       display:inline-flex;
+#       align-items:center;
+#       gap:8px;
+#     }
+#     .badge:hover{border-color:var(--border-strong)}
+#
+#     .container{
+#       max-width:520px;
+#       margin:0;
+#       padding:24px 0 24px 24px;  /* left only */
+#     }
+#
+#     .card{
+#       background:rgba(255,255,255,0.92);
+#       border:1px solid var(--border);
+#       border-radius:var(--radius);
+#       box-shadow:var(--shadow);
+#       overflow:hidden;
+#     }
+#
+#     .head{
+#       padding:18px 20px 14px 20px;
+#       border-bottom:1px solid var(--border);
+#       display:flex;
+#       align-items:flex-start;
+#       justify-content:space-between;
+#       gap:12px;
+#     }
+#
+#     .title{margin:0;font-size:16px;font-weight:900;letter-spacing:.2px}
+#     .subtitle{margin:6px 0 0 0;font-size:12px;color:var(--text-muted);line-height:1.4}
+#
+#     .body{padding:18px 20px 20px 20px;}
+#     .stack{display:flex; flex-direction:column; gap:14px;}
+#
+#     label{
+#       display:block;
+#       font-size:12px;
+#       font-weight:800;
+#       color:var(--text-secondary);
+#       margin-bottom:6px;
+#     }
+#
+#     input[type="text"]{
+#       width:100%;
+#       height:32px;
+#       padding:0 10px;
+#       border-radius:10px;
+#       border:1px solid var(--border-strong);
+#       background:#FFFFFF;
+#       color:var(--text-primary);
+#       outline:none;
+#       font-size:12px;
+#     }
+#
+#     input[type="text"]::placeholder{color:rgba(100,116,139,0.75)}
+#
+#     input[type="text"]:focus{
+#       border-color:rgba(100,116,139,0.45);
+#       box-shadow:0 0 0 4px var(--focus);
+#     }
+#
+#     /* Textarea styling */
+#     textarea{
+#       width:100%;
+#       min-height:90px;
+#       padding:10px;
+#       border-radius:10px;
+#       border:1px solid var(--border-strong);
+#       background:#FFFFFF;
+#       color:var(--text-primary);
+#       outline:none;
+#       font-size:12px;
+#       font-family:var(--sans);
+#       resize:vertical;
+#     }
+#
+#     textarea::placeholder{color:rgba(100,116,139,0.75)}
+#
+#     textarea:focus{
+#       border-color:rgba(100,116,139,0.45);
+#       box-shadow:0 0 0 4px var(--focus);
+#     }
+#
+#     /* NEW: select styling to match inputs */
+#     select{
+#       width:100%;
+#       height:32px;
+#       padding:0 10px;
+#       border-radius:10px;
+#       border:1px solid var(--border-strong);
+#       background:#FFFFFF;
+#       color:var(--text-primary);
+#       outline:none;
+#       font-size:12px;
+#     }
+#
+#     select:focus{
+#       border-color:rgba(100,116,139,0.45);
+#       box-shadow:0 0 0 4px var(--focus);
+#     }
+#
+#     .actions{
+#       display:flex;
+#       flex-wrap:wrap;
+#       gap:10px;
+#       margin-top:4px;
+#     }
+#
+#     button.btn{
+#       display:inline-flex;
+#       align-items:center;
+#       justify-content:center;
+#       height:40px;
+#       min-width:140px;
+#       padding:0 14px;
+#       border-radius:12px;
+#       border:1px solid var(--border-strong);
+#       text-decoration:none;
+#       font-weight:800;
+#       font-size:13px;
+#       letter-spacing:.2px;
+#       cursor:pointer;
+#       background:#E5E7EB; /* gray */
+#       color:#0F172A;
+#     }
+#     button.btn:hover{background:#D1D5DB}
+#
+#     button.primary{background:#E5E7EB}
+#     button.primary:hover{background:#D1D5DB}
+#
+#     button.secondary{
+#       background:#E5E7EB;
+#       border:1px solid var(--border-strong);
+#       color:#0F172A;
+#     }
+#     button.secondary:hover{background:#D1D5DB}
+#
+#     .callout{
+#       border:1px solid rgba(220,38,38,0.28);
+#       background:rgba(220,38,38,0.06);
+#       color:var(--text-primary);
+#       border-radius:14px;
+#       padding:12px 14px;
+#       font-size:12px;
+#       line-height:1.45;
+#     }
+#   </style>
+# </head>
+#
+# <body>
+#   <div class="topbar">
+#     <div class="brand">
+#       <div class="logo"></div>
+#       <div>
+#         <h1>Titanium Technology Gap Analysis</h1>
+#         <div class="muted">Enter inputs and run the analysis</div>
+#       </div>
+#     </div>
+#     <a class="badge" href="/">New run</a>
+#   </div>
+#
+#   <div class="container">
+#     <div class="card">
+#       <div class="head">
+#         <div>
+#           <p class="title">Run Analysis</p>
+#           <p class="subtitle">Provide a competitor domain/URL. Baseline and file are optional.</p>
+#         </div>
+#       </div>
+#
+#       <div class="body">
+#         <div class="stack">
+#
+#           {% if error %}
+#             <div class="callout">
+#               <strong>Error:</strong> {{ error }}
+#             </div>
+#           {% endif %}
+#
+#           <form method="post" action="/run">
+#             <div style="margin-bottom:12px;">
+#               <label>Primary Competitor (required)</label>
+#               <input
+#                 type="text"
+#                 name="competitor"
+#                 value="{{ competitor or '' }}"
+#                 placeholder="Ministry of Labour and Social Affairs"
+#                 required
+#               />
+#             </div>
+#
+#             <div style="margin-bottom:12px;">
+#               <label>Secondary Competitor (optional)</label>
+#               <input
+#                 type="text"
+#                 name="baseline"
+#                 value="{{ baseline or '' }}"
+#                 placeholder="leave blank to disable"
+#               />
+#             </div>
+#
+#             <!-- Instruction Preset -->
+#             <div style="margin-bottom:12px;">
+#               <label>Instruction Preset (optional)</label>
+#               <select name="instruction_preset">
+#                 <option value="">None (use free text only)</option>
+#                 <option value="scoring" {% if instruction_preset=='scoring' %}selected{% endif %}>Scoring table + differentiators</option>
+#                 <option value="executive" {% if instruction_preset=='executive' %}selected{% endif %}>Executive summary (board-ready)</option>
+#                 <option value="technical" {% if instruction_preset=='technical' %}selected{% endif %}>Technical deep-dive</option>
+#                 <option value="evidence_strict" {% if instruction_preset=='evidence_strict' %}selected{% endif %}>Evidence-strict (no inference)</option>
+#                 <option value="slide" {% if instruction_preset=='slide' %}selected{% endif %}>Slide-ready bullets</option>
+#                 <option value="risk" {% if instruction_preset=='risk' %}selected{% endif %}>Compliance + risk emphasis</option>
+#               </select>
+#             </div>
+#
+#             <!-- Additional Instructions -->
+#             <div style="margin-bottom:12px;">
+#               <label>Additional Instructions (optional)</label>
+#               <textarea
+#                 name="extra_instructions"
+#                 placeholder="Example: Include a scoring table (1–5), add an executive summary, and list top 3 differentiators."
+#               >{{ extra_instructions or '' }}</textarea>
+#             </div>
+#
+#             <!-- File (optional) -->
+#             <div style="margin-bottom:12px;">
+#               <label>File (optional)</label>
+#               <input
+#                 type="text"
+#                 name="file"
+#                 value="{{ file or '' }}"
+#                 placeholder="leave blank to auto-pick from INI"
+#               />
+#             </div>
+#
+#             <div class="actions">
+#               <button class="btn primary" type="submit" formtarget="_blank">Run Analysis</button>
+#               <button class="btn secondary" type="reset">Clear</button>
+#             </div>
+#           </form>
+#
+#         </div>
+#       </div>
+#     </div>
+#   </div>
+# </body>
+# </html>
+
+
+

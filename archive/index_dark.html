@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Titanium Technology Gap Analysis</title>
+
+  <style>
+    :root{
+      /* Neutral dark gray palette (no blue) */
+      --bg-app:#0B0F14;
+      --bg-surface:#0F141B;
+      --bg-surface-2:#141B24;
+
+      --text-primary:#E6EDF7;
+      --text-secondary:#A9B4C7;
+      --text-muted:#76839A;
+
+      --border:rgba(230,237,247,0.10);
+      --border-strong:rgba(230,237,247,0.18);
+
+      --focus:rgba(148,163,184,0.22);
+      --error:#FF5B5B;
+      --success:#27D9A2;
+
+      --shadow: 0 14px 40px rgba(0,0,0,.40);
+      --radius:16px;
+      --radius-sm:12px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text-primary);
+      /* Neutral glows (no blue/green tint) */
+      background:
+        radial-gradient(1200px 600px at 15% 0%, rgba(148,163,184,0.10), transparent 55%),
+        radial-gradient(900px 500px at 80% 10%, rgba(148,163,184,0.06), transparent 60%),
+        var(--bg-app);
+      min-height:100vh;
+    }
+
+    .topbar{
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 16px;
+      background:rgba(15,20,27,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+      position:sticky; top:0; z-index:10;
+    }
+
+    .brand{display:flex; align-items:center; gap:10px; letter-spacing:.2px;}
+
+    .logo{
+      width:34px; height:34px; border-radius:10px;
+      background:linear-gradient(135deg, rgba(148,163,184,.80), rgba(148,163,184,.25));
+      box-shadow: 0 8px 22px rgba(148,163,184,.14);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand h1{margin:0;font-size:14px;font-weight:800}
+    .muted{color:var(--text-muted); font-size:12px}
+
+    .badge{
+      font-size:12px;
+      color:var(--text-muted);
+      border:1px solid var(--border);
+      background:rgba(20,27,36,0.70);
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .container{max-width:920px;margin:0 auto;padding:24px;}
+
+    .card{
+      background:rgba(15,20,27,0.92);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .head{
+      padding:18px 20px 14px 20px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .title{margin:0;font-size:16px;font-weight:900;letter-spacing:.2px}
+    .subtitle{margin:6px 0 0 0;font-size:12px;color:var(--text-muted);line-height:1.4}
+
+    .body{padding:18px 20px 20px 20px;}
+    .stack{display:flex; flex-direction:column; gap:14px;}
+
+    /* Form fields styled like the report */
+    label{
+      display:block;
+      font-size:12px;
+      font-weight:800;
+      color:var(--text-secondary);
+      margin-bottom:6px;
+    }
+
+    /* CHANGED: entry field background to white */
+    input[type="text"]{
+      width:100%;
+      height:40px;
+      padding:0 12px;
+      border-radius:12px;
+      border:1px solid var(--border-strong);
+      background:#FFFFFF;
+      color:#0B0F14; /* readable on white */
+      outline:none;
+    }
+
+    /* CHANGED: placeholder color for white background */
+    input[type="text"]::placeholder{color:rgba(15,23,42,0.55)}
+
+    input[type="text"]:focus{
+      border-color:rgba(148,163,184,0.55);
+      box-shadow:0 0 0 4px var(--focus);
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:4px;
+    }
+
+    button.btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height:40px;
+      padding:0 14px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.10);
+      text-decoration:none;
+      font-weight:800;
+      font-size:13px;
+      letter-spacing:.2px;
+      cursor:pointer;
+    }
+
+    /* Primary button: neutral dark gray */
+    button.primary{
+      background:#2B313B;
+      color:var(--text-primary);
+      border-color:rgba(230,237,247,0.16);
+    }
+    button.primary:hover{background:#3A4250}
+
+    button.secondary{
+      background:transparent;
+      color:var(--text-primary);
+      border:1px solid var(--border-strong);
+    }
+    button.secondary:hover{border-color:rgba(230,237,247,0.28)}
+
+    .callout{
+      border:1px solid rgba(255,91,91,0.35);
+      background:rgba(255,91,91,0.08);
+      color:var(--text-primary);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:12px;
+      line-height:1.45;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Titanium Technology Gap Analysis</h1>
+        <div class="muted">Enter inputs and run the analysis</div>
+      </div>
+    </div>
+    <a class="badge" href="/">New run</a>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="head">
+        <div>
+          <p class="title">Run Analysis</p>
+          <p class="subtitle">Provide a competitor domain/URL. Baseline and file are optional.</p>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="stack">
+
+          {% if error %}
+            <div class="callout">
+              <strong>Error:</strong> {{ error }}
+            </div>
+          {% endif %}
+
+          <form method="post" action="/run">
+            <div style="margin-bottom:12px;">
+              <label>Competitor (required)</label>
+              <input
+                type="text"
+                name="competitor"
+                value="{{ competitor or '' }}"
+                placeholder="tektelic.com or https://tektelic.com"
+                required
+              />
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <label>Baseline (optional)</label>
+              <input
+                type="text"
+                name="baseline"
+                value="{{ baseline or '' }}"
+                placeholder="door.com or leave blank to disable"
+              />
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <label>File (optional)</label>
+              <input
+                type="text"
+                name="file"
+                value="{{ file or '' }}"
+                placeholder="leave blank to auto-pick from INI compare_file_location"
+              />
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" type="submit">Run Analysis</button>
+              <button class="btn secondary" type="reset">Clear</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

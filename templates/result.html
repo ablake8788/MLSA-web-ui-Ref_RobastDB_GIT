@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ministry of Labour and Social Affairs / Personal Home Care of New Jersey Gap Analysis Gap Analysis Report</title>
+  <style>
+    :root{
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --shadow:0 6px 18px rgba(0,0,0,.06);
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --fail:#991b1b;
+      --fail-bg:#fef2f2;
+      --btn:#111827;
+      --btn-text:#ffffff;
+      --btn-muted:#ffffff;
+      --btn-muted-text:#111827;
+      --focus:rgba(59,130,246,.25);
+      --link:#1d4ed8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.45;
+    }
+    .wrap{max-width:1100px;margin:32px auto;padding:0 18px}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+    .title h1{margin:0 0 6px 0;font-size:22px;font-weight:700;letter-spacing:.2px}
+    .title p{margin:0;color:var(--muted);font-size:14px}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--border);
+      padding:10px 12px;border-radius:999px;
+      background:var(--card);box-shadow:var(--shadow);
+      white-space:nowrap;height:fit-content
+    }
+    .pill .dot{width:10px;height:10px;border-radius:999px;background:#9ca3af}
+    .pill.ok{border-color:#bbf7d0;background:var(--ok-bg)}
+    .pill.ok .dot{background:#10b981}
+    .pill.ok span{color:var(--ok);font-weight:700}
+    .pill.fail{border-color:#fecaca;background:var(--fail-bg)}
+    .pill.fail .dot{background:#ef4444}
+    .pill.fail span{color:var(--fail);font-weight:700}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:14px
+    }
+    .section-title{
+      margin:0 0 10px 0;
+      font-size:14px;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:700
+    }
+    .kv{
+      display:grid;
+      grid-template-columns:180px 1fr;
+      gap:10px;
+      padding:10px 0;
+      border-bottom:1px solid var(--border)
+    }
+    .kv:last-child{border-bottom:none}
+    .k{color:var(--muted);font-size:14px}
+    .v{font-size:14px;overflow-wrap:anywhere}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:10px 12px;border-radius:10px;border:1px solid var(--border);
+      text-decoration:none;font-weight:700;font-size:14px;cursor:pointer;
+      background:var(--btn-muted);color:var(--btn-muted-text)
+    }
+    .btn.primary{background:var(--btn);color:var(--btn-text);border-color:rgba(17,24,39,.9)}
+    .btn:focus{outline:none;box-shadow:0 0 0 4px var(--focus)}
+    .note{margin:8px 0 0 0;color:var(--muted);font-size:13px}
+    .iframe-wrap{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff}
+    iframe{width:100%;height:72vh;border:0;background:#fff}
+    details{border:1px solid var(--border);border-radius:12px;background:#fafafa;padding:10px 12px}
+    details>summary{cursor:pointer;font-weight:700;color:var(--text)}
+    pre{
+      margin:10px 0 0 0;padding:12px;background:#0b1020;color:#e5e7eb;
+      border-radius:12px;overflow:auto;font-size:12px;line-height:1.35
+    }
+    .muted-link{color:var(--link);text-decoration:none;font-weight:700}
+    .muted-link:hover{text-decoration:underline}
+    @media (max-width:720px){
+      .kv{grid-template-columns:1fr}
+      .k{font-weight:700}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <h1>Ministry of Labour and Social Affairs ( Ministry of Labour and Social Affairs / Personal Home Care of New Jersey Gap Analysis Analysis Report</h1>
+        <p>Generated outputs and preview of the latest run.</p>
+      </div>
+
+      {% if (status|default("failed")) == "ok" %}
+        <div class="pill ok"><span class="dot"></span><span>Completed</span></div>
+      {% else %}
+        <div class="pill fail"><span class="dot"></span><span>Failed</span></div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Report Summary and Details</div>
+
+      <div class="kv">
+        <div class="k">Primary Competitor</div>
+        <div class="v">{{ competitor|default("") }}</div>
+      </div>
+
+      {% if baseline %}
+      <div class="kv">
+        <div class="k">Competitor</div>
+        <div class="v">{{ baseline }}</div>
+      </div>
+      {% endif %}
+
+      <div class="kv">
+        <div class="k">Generated</div>
+        <div class="v">{{ generated_at|default("") }}</div>
+      </div>
+
+      <div class="kv">
+        <div class="k">Duration</div>
+        <div class="v">{{ duration_seconds|default(0) }} seconds</div>
+      </div>
+
+      <div class="actions">
+        {% set html_url = (generated.html if generated is defined else None) %}
+        {% set docx_url = (generated.docx if generated is defined else None) %}
+        {% set pptx_url = (generated.pptx if generated is defined else None) %}
+        {% set md_url   = (generated.md if generated is defined else None) %}
+
+        {% if html_url %}
+          <a class="btn primary" href="{{ html_url }}" target="_blank" rel="noopener">Open HTML</a>
+        {% endif %}
+        {% if docx_url %}
+          <a class="btn" href="{{ docx_url }}" target="_blank" rel="noopener">Download Word</a>
+        {% endif %}
+        {% if pptx_url %}
+          <a class="btn" href="{{ pptx_url }}" target="_blank" rel="noopener">Download PowerPoint</a>
+        {% endif %}
+        {% if md_url %}
+          <a class="btn" href="{{ md_url }}" target="_blank" rel="noopener">Download Markdown</a>
+        {% endif %}
+
+        <a class="btn" href="{{ url_for('index') }}">Run Another</a>
+      </div>
+
+      {% if (status|default("failed")) != "ok" %}
+        <p class="note">The run did not complete successfully. Review the diagnostics below.</p>
+
+        <details style="margin-top:12px;">
+          <summary>Run Diagnostics</summary>
+          <p class="note" style="margin-top:8px;">
+            Exit code: <strong>{{ exit_code|default("unknown") }}</strong>
+          </p>
+
+          {% if stderr_tail %}
+            <p class="note"><strong>stderr (last lines)</strong></p>
+            <pre>{{ stderr_tail }}</pre>
+          {% endif %}
+
+          {% if stdout_tail %}
+            <p class="note"><strong>stdout (last lines)</strong></p>
+            <pre>{{ stdout_tail }}</pre>
+          {% endif %}
+        </details>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Report Preview</div>
+
+      {% set html_url = (generated.html if generated is defined else None) %}
+      {% if html_url %}
+        <div class="iframe-wrap">
+          <iframe src="{{ html_url }}" title="HTML Report Preview"></iframe>
+        </div>
+        <p class="note">
+          If the preview is blocked by browser security, use
+          <a class="muted-link" href="{{ html_url }}" target="_blank" rel="noopener">Open HTML</a>.
+        </p>
+      {% else %}
+        <p class="note">
+          Preview is unavailable because the HTML path was not detected in the report output folder.
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1945 @@
+<!--  woring neutrial -->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Technology Gap Analysis Report</title>
+  <style>
+    :root{
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --shadow:0 6px 18px rgba(0,0,0,.06);
+      --ok:#065f46;
+      --ok-bg:#ecfdf5;
+      --fail:#991b1b;
+      --fail-bg:#fef2f2;
+      --btn:#111827;
+      --btn-text:#ffffff;
+      --btn-muted:#ffffff;
+      --btn-muted-text:#111827;
+      --focus:rgba(59,130,246,.25);
+      --link:#1d4ed8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.45;
+    }
+    .wrap{max-width:1100px;margin:32px auto;padding:0 18px}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+    .title h1{margin:0 0 6px 0;font-size:22px;font-weight:700;letter-spacing:.2px}
+    .title p{margin:0;color:var(--muted);font-size:14px}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--border);
+      padding:10px 12px;border-radius:999px;
+      background:var(--card);box-shadow:var(--shadow);
+      white-space:nowrap;height:fit-content
+    }
+    .pill .dot{width:10px;height:10px;border-radius:999px;background:#9ca3af}
+    .pill.ok{border-color:#bbf7d0;background:var(--ok-bg)}
+    .pill.ok .dot{background:#10b981}
+    .pill.ok span{color:var(--ok);font-weight:700}
+    .pill.fail{border-color:#fecaca;background:var(--fail-bg)}
+    .pill.fail .dot{background:#ef4444}
+    .pill.fail span{color:var(--fail);font-weight:700}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:14px
+    }
+    .section-title{
+      margin:0 0 10px 0;
+      font-size:14px;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:700
+    }
+    .kv{
+      display:grid;
+      grid-template-columns:180px 1fr;
+      gap:10px;
+      padding:10px 0;
+      border-bottom:1px solid var(--border)
+    }
+    .kv:last-child{border-bottom:none}
+    .k{color:var(--muted);font-size:14px}
+    .v{font-size:14px;overflow-wrap:anywhere}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:10px 12px;border-radius:10px;border:1px solid var(--border);
+      text-decoration:none;font-weight:700;font-size:14px;cursor:pointer;
+      background:var(--btn-muted);color:var(--btn-muted-text)
+    }
+    .btn.primary{background:var(--btn);color:var(--btn-text);border-color:rgba(17,24,39,.9)}
+    .btn:focus{outline:none;box-shadow:0 0 0 4px var(--focus)}
+    .note{margin:8px 0 0 0;color:var(--muted);font-size:13px}
+    .iframe-wrap{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff}
+    iframe{width:100%;height:72vh;border:0;background:#fff}
+    details{border:1px solid var(--border);border-radius:12px;background:#fafafa;padding:10px 12px}
+    details>summary{cursor:pointer;font-weight:700;color:var(--text)}
+    pre{
+      margin:10px 0 0 0;padding:12px;background:#0b1020;color:#e5e7eb;
+      border-radius:12px;overflow:auto;font-size:12px;line-height:1.35
+    }
+    .muted-link{color:var(--link);text-decoration:none;font-weight:700}
+    .muted-link:hover{text-decoration:underline}
+    @media (max-width:720px){
+      .kv{grid-template-columns:1fr}
+      .k{font-weight:700}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <h1>Technology Gap Analysis Report</h1>
+        <p>Generated outputs and preview of the latest run.</p>
+      </div>
+
+      {% if (status|default("failed")) == "ok" %}
+        <div class="pill ok"><span class="dot"></span><span>Completed</span></div>
+      {% else %}
+        <div class="pill fail"><span class="dot"></span><span>Failed</span></div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Report Summary and Details</div>
+
+      <div class="kv">
+        <div class="k">Competitor</div>
+        <div class="v">{{ competitor|default("") }}</div>
+      </div>
+
+      {% if baseline %}
+      <div class="kv">
+        <div class="k">Baseline</div>
+        <div class="v">{{ baseline }}</div>
+      </div>
+      {% endif %}
+
+      <div class="kv">
+        <div class="k">Generated</div>
+        <div class="v">{{ generated_at|default("") }}</div>
+      </div>
+
+      <div class="kv">
+        <div class="k">Duration</div>
+        <div class="v">{{ duration_seconds|default(0) }} seconds</div>
+      </div>
+
+      <div class="actions">
+        {% set html_url = (generated.html if generated is defined else None) %}
+        {% set docx_url = (generated.docx if generated is defined else None) %}
+        {% set pptx_url = (generated.pptx if generated is defined else None) %}
+        {% set md_url   = (generated.md if generated is defined else None) %}
+
+        {% if html_url %}
+          <a class="btn primary" href="{{ html_url }}" target="_blank" rel="noopener">Open HTML</a>
+        {% endif %}
+        {% if docx_url %}
+          <a class="btn" href="{{ docx_url }}" target="_blank" rel="noopener">Download Word</a>
+        {% endif %}
+        {% if pptx_url %}
+          <a class="btn" href="{{ pptx_url }}" target="_blank" rel="noopener">Download PowerPoint</a>
+        {% endif %}
+        {% if md_url %}
+          <a class="btn" href="{{ md_url }}" target="_blank" rel="noopener">Download Markdown</a>
+        {% endif %}
+
+        <a class="btn" href="{{ url_for('index') }}">Run Another</a>
+      </div>
+
+      {% if (status|default("failed")) != "ok" %}
+        <p class="note">The run did not complete successfully. Review the diagnostics below.</p>
+
+        <details style="margin-top:12px;">
+          <summary>Run Diagnostics</summary>
+          <p class="note" style="margin-top:8px;">
+            Exit code: <strong>{{ exit_code|default("unknown") }}</strong>
+          </p>
+
+          {% if stderr_tail %}
+            <p class="note"><strong>stderr (last lines)</strong></p>
+            <pre>{{ stderr_tail }}</pre>
+          {% endif %}
+
+          {% if stdout_tail %}
+            <p class="note"><strong>stdout (last lines)</strong></p>
+            <pre>{{ stdout_tail }}</pre>
+          {% endif %}
+        </details>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Report Preview</div>
+
+      {% set html_url = (generated.html if generated is defined else None) %}
+      {% if html_url %}
+        <div class="iframe-wrap">
+          <iframe src="{{ html_url }}" title="HTML Report Preview"></iframe>
+        </div>
+        <p class="note">
+          If the preview is blocked by browser security, use
+          <a class="muted-link" href="{{ html_url }}" target="_blank" rel="noopener">Open HTML</a>.
+        </p>
+      {% else %}
+        <p class="note">
+          Preview is unavailable because the HTML path was not detected in the report output folder.
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+<!--  dark background  -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Technology Gap Analysis Report</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1b33;
+      --text:#e7eefc;
+      --muted:#a9b7d0;
+      --line:rgba(231,238,252,.14);
+      --accent:#6aa5ff;
+      --accent2:#7ee0b8;
+      --danger:#ff6a6a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      background: radial-gradient(1000px 600px at 10% 0%, rgba(106,165,255,.18), transparent 60%),
+                  radial-gradient(900px 550px at 90% 20%, rgba(126,224,184,.14), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width: 980px;
+      margin: 28px auto 48px;
+      padding: 0 18px;
+    }
+    .header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 16px;
+    }
+    .title h1{
+      margin:0 0 6px 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .title .sub{
+      color:var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      min-width: 160px;
+      justify-content:center;
+      font-size: 13px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .badge.ok b{color:var(--accent2)}
+    .badge.fail b{color:var(--danger)}
+    .card{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
+      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+      padding: 16px 16px;
+      margin-top: 12px;
+    }
+    .card h2{
+      margin:0 0 10px 0;
+      font-size: 15px;
+      letter-spacing: .2px;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 190px 1fr;
+      gap:10px 16px;
+      align-items:start;
+      font-size: 13px;
+    }
+    .k{color:var(--muted)}
+    .v{color:var(--text); word-break:break-word}
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top: 12px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      text-decoration:none;
+      font-size: 13px;
+      transition: transform .05s ease, border-color .12s ease, background .12s ease;
+    }
+    .btn:hover{
+      border-color: rgba(106,165,255,.45);
+      background: rgba(106,165,255,.10);
+    }
+    .btn.primary{
+      border-color: rgba(106,165,255,.55);
+      background: rgba(106,165,255,.12);
+    }
+    .preview{
+      margin-top: 10px;
+      border-radius: 14px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.20);
+    }
+    iframe{
+      width:100%;
+      height: 820px;
+      border:0;
+      background:white;
+    }
+    .note{
+      color:var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 10px;
+    }
+    pre{
+      margin:10px 0 0 0;
+      padding:12px;
+      background: rgba(0,0,0,.25);
+      border:1px solid var(--line);
+      border-radius: 12px;
+      color: var(--text);
+      overflow:auto;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+
+
+<!--    <div class="header">-->
+<!--      <div class="title">-->
+<!--        <h1>Technology Gap Analysis Report</h1>-->
+<!--        <div class="sub">-->
+<!--          Generated: {{ generated_at or "—" }}-->
+<!--          {% if duration_seconds is defined %}-->
+<!--            · Duration: {{ duration_seconds }}s-->
+<!--          {% endif %}-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      {% if status == "failed" %}-->
+<!--        <div class="badge fail">Status: <b>Failed</b></div>-->
+<!--      {% else %}-->
+<!--        <div class="badge ok">Status: <b>Completed</b></div>-->
+<!--      {% endif %}-->
+<!--    </div>-->
+
+<!--    <div class="card">-->
+<!--      <h2>Report Summary</h2>-->
+<!--      <div class="kv">-->
+<!--        <div class="k">Competitor</div>-->
+<!--        <div class="v">{{ competitor }}</div>-->
+
+<!--        <div class="k">Baseline</div>-->
+<!--        <div class="v">-->
+<!--          {% if baseline %}-->
+<!--            {{ baseline }}-->
+<!--          {% else %}-->
+<!--            Not used-->
+<!--          {% endif %}-->
+<!--        </div>-->
+
+<!--        <div class="k">Outputs</div>-->
+<!--        <div class="v">-->
+<!--          {% set outputs = [] %}-->
+<!--          {% if generated and generated.docx %}{% set _ = outputs.append("Word") %}{% endif %}-->
+<!--          {% if generated and generated.pptx %}{% set _ = outputs.append("PowerPoint") %}{% endif %}-->
+<!--          {% if generated and generated.md %}{% set _ = outputs.append("Markdown") %}{% endif %}-->
+<!--          {% if generated and generated.html %}{% set _ = outputs.append("HTML") %}{% endif %}-->
+<!--          {{ outputs|join(", ") if outputs else "None detected" }}-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="actions">-->
+<!--        {% if generated and generated.docx %}-->
+<!--          <a class="btn primary" href="{{ generated.docx }}">Download Word (.docx)</a>-->
+<!--        {% endif %}-->
+<!--        {% if generated and generated.pptx %}-->
+<!--          <a class="btn" href="{{ generated.pptx }}">Download PowerPoint (.pptx)</a>-->
+<!--        {% endif %}-->
+<!--        {% if generated and generated.md %}-->
+<!--          <a class="btn" href="{{ generated.md }}">Download Markdown (.md)</a>-->
+<!--        {% endif %}-->
+<!--        {% if generated and generated.html %}-->
+<!--          <a class="btn" href="{{ generated.html }}">Open HTML report</a>-->
+<!--        {% endif %}-->
+<!--        <a class="btn" href="{{ url_for('index') }}">Run another analysis</a>-->
+<!--      </div>-->
+
+<!--      <div class="note">-->
+<!--        The preview below is rendered from the generated HTML report.-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <div class="card">-->
+<!--      <h2>Report Details</h2>-->
+<!--      <div class="kv">-->
+<!--        <div class="k">Exit code</div>-->
+<!--        <div class="v">{{ exit_code }}</div>-->
+
+<!--        <div class="k">Preview</div>-->
+<!--        <div class="v">-->
+<!--          {% if generated and generated.html %}-->
+<!--            Available-->
+<!--          {% else %}-->
+<!--            Not available (HTML output not detected)-->
+<!--          {% endif %}-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      {% if status == "failed" %}-->
+<!--        <div class="note" style="margin-top:12px;">-->
+<!--          Diagnostic output is shown below because the run did not complete successfully.-->
+<!--        </div>-->
+<!--        {% if stderr_tail %}-->
+<!--          <pre><b>stderr</b>-->
+<!--{{ stderr_tail }}</pre>-->
+<!--        {% endif %}-->
+<!--        {% if stdout_tail %}-->
+<!--          <pre><b>stdout</b>-->
+<!--{{ stdout_tail }}</pre>-->
+<!--        {% endif %}-->
+<!--      {% endif %}-->
+<!--    </div>-->
+
+<!--    <div class="card">-->
+<!--      <h2>Report Preview</h2>-->
+
+<!--      {% if generated and generated.html %}-->
+<!--        <div class="preview">-->
+<!--          <iframe src="{{ generated.html }}"></iframe>-->
+<!--        </div>-->
+<!--      {% else %}-->
+<!--        <div class="note">-->
+<!--          A preview is not available because the HTML report path was not provided to this template.-->
+<!--          Ensure your Flask route passes <code>generated["html"]</code>.-->
+<!--        </div>-->
+<!--      {% endif %}-->
+<!--    </div>-->
+
+<!--  </div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+<!--&lt;!&ndash;<!doctype html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="en">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;  <meta charset="utf-8" />&ndash;&gt;-->
+<!--&lt;!&ndash;  <meta name="viewport" content="width=device-width,initial-scale=1" />&ndash;&gt;-->
+<!--&lt;!&ndash;  <title>Technology Gap Analysis Report</title>&ndash;&gt;-->
+<!--&lt;!&ndash;  <style>&ndash;&gt;-->
+<!--&lt;!&ndash;    :root{&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;bg:#0b1220;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;card:#0f1b33;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;text:#e7eefc;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;muted:#a9b7d0;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;line:rgba(231,238,252,.14);&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;accent:#6aa5ff;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;accent2:#7ee0b8;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;danger:#ff6a6a;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    *{box-sizing:border-box}&ndash;&gt;-->
+<!--&lt;!&ndash;    body{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:0;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: radial-gradient(1000px 600px at 10% 0%, rgba(106,165,255,.18), transparent 60%),&ndash;&gt;-->
+<!--&lt;!&ndash;                  radial-gradient(900px 550px at 90% 20%, rgba(126,224,184,.14), transparent 55%),&ndash;&gt;-->
+<!--&lt;!&ndash;                  var(&#45;&#45;bg);&ndash;&gt;-->
+<!--&lt;!&ndash;      color:var(&#45;&#45;text);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .wrap{&ndash;&gt;-->
+<!--&lt;!&ndash;      max-width: 980px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin: 28px auto 48px;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0 18px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .header{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:flex-start;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content:space-between;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .title h1{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:0 0 6px 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 22px;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 700;&ndash;&gt;-->
+<!--&lt;!&ndash;      letter-spacing: .2px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .title .sub{&ndash;&gt;-->
+<!--&lt;!&ndash;      color:var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;      line-height: 1.35;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .badge{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:8px;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding:10px 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(255,255,255,.03);&ndash;&gt;-->
+<!--&lt;!&ndash;      min-width: 160px;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      white-space:nowrap;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .badge.ok b{color:var(&#45;&#45;accent2)}&ndash;&gt;-->
+<!--&lt;!&ndash;    .badge.fail b{color:var(&#45;&#45;danger)}&ndash;&gt;-->
+<!--&lt;!&ndash;    .card{&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(255,255,255,.03);&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: 0 10px 24px rgba(0,0,0,.22);&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 16px 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .card h2{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:0 0 10px 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 15px;&ndash;&gt;-->
+<!--&lt;!&ndash;      letter-spacing: .2px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .kv{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:grid;&ndash;&gt;-->
+<!--&lt;!&ndash;      grid-template-columns: 190px 1fr;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:10px 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:start;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .k{color:var(&#45;&#45;muted)}&ndash;&gt;-->
+<!--&lt;!&ndash;    .v{color:var(&#45;&#45;text); word-break:break-word}&ndash;&gt;-->
+<!--&lt;!&ndash;    .actions{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      flex-wrap:wrap;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:10px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding:10px 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(255,255,255,.04);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration:none;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: transform .05s ease, border-color .12s ease, background .12s ease;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn:hover{&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: rgba(106,165,255,.45);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(106,165,255,.10);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn.primary{&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: rgba(106,165,255,.55);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(106,165,255,.12);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .preview{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 10px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 14px;&ndash;&gt;-->
+<!--&lt;!&ndash;      overflow:hidden;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(0,0,0,.20);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    iframe{&ndash;&gt;-->
+<!--&lt;!&ndash;      width:100%;&ndash;&gt;-->
+<!--&lt;!&ndash;      height: 820px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:0;&ndash;&gt;-->
+<!--&lt;!&ndash;      background:white;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .note{&ndash;&gt;-->
+<!--&lt;!&ndash;      color:var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      line-height: 1.4;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 10px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    pre{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:10px 0 0 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding:12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(0,0,0,.25);&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text);&ndash;&gt;-->
+<!--&lt;!&ndash;      overflow:auto;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      line-height: 1.35;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;  </style>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;  <div class="wrap">&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="header">&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="title">&ndash;&gt;-->
+<!--&lt;!&ndash;        <h1>Technology Gap Analysis Report</h1>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="sub">&ndash;&gt;-->
+<!--&lt;!&ndash;          Generated: {{ generated_at or "—" }}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if duration_seconds is defined %}&ndash;&gt;-->
+<!--&lt;!&ndash;            · Duration: {{ duration_seconds }}s&ndash;&gt;-->
+<!--&lt;!&ndash;          {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      {% if status == "failed" %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="badge fail">Status: <b>Failed</b></div>&ndash;&gt;-->
+<!--&lt;!&ndash;      {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="badge ok">Status: <b>Completed</b></div>&ndash;&gt;-->
+<!--&lt;!&ndash;      {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="card">&ndash;&gt;-->
+<!--&lt;!&ndash;      <h2>Report Summary</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="kv">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="k">Competitor</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">{{ competitor }}</div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div class="k">Baseline</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if baseline %}&ndash;&gt;-->
+<!--&lt;!&ndash;            {{ baseline }}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;            Not used&ndash;&gt;-->
+<!--&lt;!&ndash;          {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div class="k">Outputs</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">&ndash;&gt;-->
+<!--&lt;!&ndash;          {% set outputs = [] %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.docx %}{% set _ = outputs.append("Word") %}{% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.pptx %}{% set _ = outputs.append("PowerPoint") %}{% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.md %}{% set _ = outputs.append("Markdown") %}{% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.html %}{% set _ = outputs.append("HTML") %}{% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {{ outputs|join(", ") if outputs else "None detected" }}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      <div class="actions">&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated and generated.docx %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <a class="btn primary" href="{{ generated.docx }}">Download Word (.docx)</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated and generated.pptx %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <a class="btn" href="{{ generated.pptx }}">Download PowerPoint (.pptx)</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated and generated.md %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <a class="btn" href="{{ generated.md }}">Download Markdown (.md)</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated and generated.html %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <a class="btn" href="{{ generated.html }}">Open HTML report</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <a class="btn" href="{{ url_for('index') }}">Run another analysis</a>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      <div class="note">&ndash;&gt;-->
+<!--&lt;!&ndash;        The preview below is rendered from the generated HTML report.&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="card">&ndash;&gt;-->
+<!--&lt;!&ndash;      <h2>Report Details</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="kv">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="k">Exit code</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">{{ exit_code }}</div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div class="k">Preview</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.html %}&ndash;&gt;-->
+<!--&lt;!&ndash;            Available&ndash;&gt;-->
+<!--&lt;!&ndash;          {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;            Not available (HTML output not detected)&ndash;&gt;-->
+<!--&lt;!&ndash;          {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      {% if status == "failed" %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="note" style="margin-top:12px;">&ndash;&gt;-->
+<!--&lt;!&ndash;          Diagnostic output is shown below because the run did not complete successfully.&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if stderr_tail %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <pre><b>stderr</b>&ndash;&gt;-->
+<!--&lt;!&ndash;{{ stderr_tail }}</pre>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if stdout_tail %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <pre><b>stdout</b>&ndash;&gt;-->
+<!--&lt;!&ndash;{{ stdout_tail }}</pre>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;      {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="card">&ndash;&gt;-->
+<!--&lt;!&ndash;      <h2>Report Preview</h2>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      {% if generated and generated.html %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="preview">&ndash;&gt;-->
+<!--&lt;!&ndash;          <iframe src="{{ generated.html }}"></iframe>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="note">&ndash;&gt;-->
+<!--&lt;!&ndash;          A preview is not available because the HTML report path was not provided to this template.&ndash;&gt;-->
+<!--&lt;!&ndash;          Ensure your Flask route passes <code>generated["html"]</code>.&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  </div>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+
+
+
+
+<!--&lt;!&ndash;&lt;!&ndash; templates/result.html &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;<!doctype html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="en">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;  <meta charset="utf-8" />&ndash;&gt;-->
+<!--&lt;!&ndash;  <meta name="viewport" content="width=device-width,initial-scale=1" />&ndash;&gt;-->
+<!--&lt;!&ndash;  <title>Technology Gap Analysis Report</title>&ndash;&gt;-->
+<!--&lt;!&ndash;  <style>&ndash;&gt;-->
+<!--&lt;!&ndash;    :root{&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;ink:#111827;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;muted:#6b7280;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;line:#e5e7eb;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;bg:#ffffff;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;card:#f9fafb;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;accent:#0f172a;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;shadow: 0 10px 20px rgba(0,0,0,.06);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    *{ box-sizing:border-box; }&ndash;&gt;-->
+<!--&lt;!&ndash;    body{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:0;&ndash;&gt;-->
+<!--&lt;!&ndash;      background:var(&#45;&#45;bg);&ndash;&gt;-->
+<!--&lt;!&ndash;      color:var(&#45;&#45;ink);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-family: "Calibri","Segoe UI", Arial, sans-serif;&ndash;&gt;-->
+<!--&lt;!&ndash;      line-height:1.45;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .page{&ndash;&gt;-->
+<!--&lt;!&ndash;      max-width: 1100px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin: 28px auto;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0 18px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Top bar */&ndash;&gt;-->
+<!--&lt;!&ndash;    .topbar{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:flex-start;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content:space-between;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 18px 18px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius:14px;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #fff;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .titleblock h1{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:0;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 26px;&ndash;&gt;-->
+<!--&lt;!&ndash;      letter-spacing:.2px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;accent);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .titleblock .subtitle{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top:6px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 14px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .badge{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:8px;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 8px 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 999px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      white-space:nowrap;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #fff;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Layout */&ndash;&gt;-->
+<!--&lt;!&ndash;    .grid{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:grid;&ndash;&gt;-->
+<!--&lt;!&ndash;      grid-template-columns: 380px 1fr;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 18px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 18px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    @media (max-width: 980px){&ndash;&gt;-->
+<!--&lt;!&ndash;      .grid{ grid-template-columns: 1fr; }&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .card{&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius:14px;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #fff;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow);&ndash;&gt;-->
+<!--&lt;!&ndash;      overflow:hidden;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .card .hd{&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 12px 14px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-bottom: 1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;card);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 700;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;accent);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 14px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .card .bd{&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 14px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Metadata table */&ndash;&gt;-->
+<!--&lt;!&ndash;    table.meta{&ndash;&gt;-->
+<!--&lt;!&ndash;      width:100%;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-collapse:separate;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-spacing:0;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    table.meta td{&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 10px 10px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-bottom: 1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      vertical-align: top;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    table.meta tr:last-child td{ border-bottom:0; }&ndash;&gt;-->
+<!--&lt;!&ndash;    table.meta td.k{&ndash;&gt;-->
+<!--&lt;!&ndash;      width: 38%;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #fff;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    table.meta td.v{&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;ink);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 500;&ndash;&gt;-->
+<!--&lt;!&ndash;      word-break: break-word;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Actions */&ndash;&gt;-->
+<!--&lt;!&ndash;    .actions{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      flex-wrap:wrap;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:10px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 6px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 10px 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 10px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration:none;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;accent);&ndash;&gt;-->
+<!--&lt;!&ndash;      background:#fff;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: transform .06s ease, box-shadow .06s ease;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn:hover{&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: 0 10px 18px rgba(0,0,0,.07);&ndash;&gt;-->
+<!--&lt;!&ndash;      transform: translateY(-1px);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn.primary{&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;accent);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: var(&#45;&#45;accent);&ndash;&gt;-->
+<!--&lt;!&ndash;      color:#fff;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn.muted{&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #fff;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Report preview */&ndash;&gt;-->
+<!--&lt;!&ndash;    .preview{&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .preview iframe{&ndash;&gt;-->
+<!--&lt;!&ndash;      width: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;      height: 76vh;&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      display:block;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: #fff;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .empty{&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 18px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 14px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Footer */&ndash;&gt;-->
+<!--&lt;!&ndash;    .footer{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      text-align:center;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;  </style>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;  <div class="page">&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="topbar">&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="titleblock">&ndash;&gt;-->
+<!--&lt;!&ndash;        <h1>Technology Gap Analysis Report</h1>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="subtitle">&ndash;&gt;-->
+<!--&lt;!&ndash;          Structured competitive comparison generated from the selected company document and referenced websites.&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      <div class="badge">&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated_at %}&ndash;&gt;-->
+<!--&lt;!&ndash;          Generated: {{ generated_at }}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;          Report generated successfully&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="grid">&ndash;&gt;-->
+
+<!--&lt;!&ndash;      &lt;!&ndash; Left: cover-style metadata + actions &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="card">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="hd">Report Details</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="bd">&ndash;&gt;-->
+<!--&lt;!&ndash;          <table class="meta" role="presentation" aria-label="Report details">&ndash;&gt;-->
+<!--&lt;!&ndash;            <tr>&ndash;&gt;-->
+<!--&lt;!&ndash;              <td class="k">Competitor</td>&ndash;&gt;-->
+<!--&lt;!&ndash;              <td class="v">{{ competitor }}</td>&ndash;&gt;-->
+<!--&lt;!&ndash;            </tr>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            {% if baseline %}&ndash;&gt;-->
+<!--&lt;!&ndash;            <tr>&ndash;&gt;-->
+<!--&lt;!&ndash;              <td class="k">Baseline</td>&ndash;&gt;-->
+<!--&lt;!&ndash;              <td class="v">{{ baseline }}</td>&ndash;&gt;-->
+<!--&lt;!&ndash;            </tr>&ndash;&gt;-->
+<!--&lt;!&ndash;            {% endif %}&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <tr>&ndash;&gt;-->
+<!--&lt;!&ndash;              <td class="k">Input File</td>&ndash;&gt;-->
+<!--&lt;!&ndash;              <td class="v">{{ file_path }}</td>&ndash;&gt;-->
+<!--&lt;!&ndash;            </tr>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            {% if report_folder %}&ndash;&gt;-->
+<!--&lt;!&ndash;            <tr>&ndash;&gt;-->
+<!--&lt;!&ndash;              <td class="k">Report Folder</td>&ndash;&gt;-->
+<!--&lt;!&ndash;              <td class="v">{{ report_folder }}</td>&ndash;&gt;-->
+<!--&lt;!&ndash;            </tr>&ndash;&gt;-->
+<!--&lt;!&ndash;            {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          </table>&ndash;&gt;-->
+
+<!--&lt;!&ndash;          {% if generated and (generated.html or generated.docx or generated.pptx or generated.md) %}&ndash;&gt;-->
+<!--&lt;!&ndash;            <div style="margin-top:14px; font-weight:700; color:var(&#45;&#45;accent); font-size:14px;">&ndash;&gt;-->
+<!--&lt;!&ndash;              Outputs&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="actions" style="margin-top:10px;">&ndash;&gt;-->
+<!--&lt;!&ndash;              {% if generated.html %}&ndash;&gt;-->
+<!--&lt;!&ndash;                <a class="btn primary" href="{{ generated.html }}" target="_blank" rel="noopener">Open Report (HTML)</a>&ndash;&gt;-->
+<!--&lt;!&ndash;              {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;              {% if generated.docx %}&ndash;&gt;-->
+<!--&lt;!&ndash;                <a class="btn" href="{{ generated.docx }}" target="_blank" rel="noopener">Download Word</a>&ndash;&gt;-->
+<!--&lt;!&ndash;              {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;              {% if generated.pptx %}&ndash;&gt;-->
+<!--&lt;!&ndash;                <a class="btn" href="{{ generated.pptx }}" target="_blank" rel="noopener">Download PowerPoint</a>&ndash;&gt;-->
+<!--&lt;!&ndash;              {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;              {% if generated.md %}&ndash;&gt;-->
+<!--&lt;!&ndash;                <a class="btn muted" href="{{ generated.md }}" target="_blank" rel="noopener">View Markdown</a>&ndash;&gt;-->
+<!--&lt;!&ndash;              {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;          {% endif %}&ndash;&gt;-->
+
+<!--&lt;!&ndash;          <div class="actions" style="margin-top:14px;">&ndash;&gt;-->
+<!--&lt;!&ndash;            <a class="btn muted" href="/">Run Another Analysis</a>&ndash;&gt;-->
+<!--&lt;!&ndash;          </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      &lt;!&ndash; Right: embedded preview of the generated HTML report (professional “report-like” experience) &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="card preview">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="hd">Report Preview</div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        {% if generated and generated.html %}&ndash;&gt;-->
+<!--&lt;!&ndash;          &lt;!&ndash; Preview the generated report HTML &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;          <iframe src="{{ generated.html }}" title="Technology Gap Analysis Report Preview"></iframe>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <div class="empty">&ndash;&gt;-->
+<!--&lt;!&ndash;            A preview is not available because the HTML report path was not provided to this template.&ndash;&gt;-->
+<!--&lt;!&ndash;            If you want this preview, ensure your Flask route passes <code>generated.html</code> (a URL to the saved HTML).&ndash;&gt;-->
+<!--&lt;!&ndash;          </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="footer">&ndash;&gt;-->
+<!--&lt;!&ndash;      Confidential – for internal use only.&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  </div>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+
+
+
+<!--&lt;!&ndash;<!doctype html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="en">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;  <meta charset="utf-8" />&ndash;&gt;-->
+<!--&lt;!&ndash;  <meta name="viewport" content="width=device-width,initial-scale=1" />&ndash;&gt;-->
+<!--&lt;!&ndash;  <title>Technology Gap Analysis Report</title>&ndash;&gt;-->
+<!--&lt;!&ndash;  <style>&ndash;&gt;-->
+<!--&lt;!&ndash;    :root{&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;bg:#0b1220;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;card:#0f1b33;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;text:#e7eefc;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;muted:#a9b7d0;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;line:rgba(231,238,252,.14);&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;accent:#6aa5ff;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;accent2:#7ee0b8;&ndash;&gt;-->
+<!--&lt;!&ndash;      &#45;&#45;danger:#ff6a6a;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    *{box-sizing:border-box}&ndash;&gt;-->
+<!--&lt;!&ndash;    body{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:0;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: radial-gradient(1000px 600px at 10% 0%, rgba(106,165,255,.18), transparent 60%),&ndash;&gt;-->
+<!--&lt;!&ndash;                  radial-gradient(900px 550px at 90% 20%, rgba(126,224,184,.14), transparent 55%),&ndash;&gt;-->
+<!--&lt;!&ndash;                  var(&#45;&#45;bg);&ndash;&gt;-->
+<!--&lt;!&ndash;      color:var(&#45;&#45;text);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .wrap{&ndash;&gt;-->
+<!--&lt;!&ndash;      max-width: 980px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin: 28px auto 48px;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0 18px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .header{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:flex-start;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content:space-between;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .title h1{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:0 0 6px 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 22px;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 700;&ndash;&gt;-->
+<!--&lt;!&ndash;      letter-spacing: .2px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .title .sub{&ndash;&gt;-->
+<!--&lt;!&ndash;      color:var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;      line-height: 1.35;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .badge{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:8px;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding:10px 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(255,255,255,.03);&ndash;&gt;-->
+<!--&lt;!&ndash;      min-width: 160px;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      white-space:nowrap;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .badge.ok b{color:var(&#45;&#45;accent2)}&ndash;&gt;-->
+<!--&lt;!&ndash;    .badge.fail b{color:var(&#45;&#45;danger)}&ndash;&gt;-->
+<!--&lt;!&ndash;    .card{&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(255,255,255,.03);&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: 0 10px 24px rgba(0,0,0,.22);&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 16px 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .card h2{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:0 0 10px 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 15px;&ndash;&gt;-->
+<!--&lt;!&ndash;      letter-spacing: .2px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .kv{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:grid;&ndash;&gt;-->
+<!--&lt;!&ndash;      grid-template-columns: 190px 1fr;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:10px 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:start;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .k{color:var(&#45;&#45;muted)}&ndash;&gt;-->
+<!--&lt;!&ndash;    .v{color:var(&#45;&#45;text); word-break:break-word}&ndash;&gt;-->
+<!--&lt;!&ndash;    .actions{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      flex-wrap:wrap;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap:10px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn{&ndash;&gt;-->
+<!--&lt;!&ndash;      display:inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content:center;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding:10px 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(255,255,255,.04);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration:none;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: transform .05s ease, border-color .12s ease, background .12s ease;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn:hover{&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: rgba(106,165,255,.45);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(106,165,255,.10);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .btn.primary{&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: rgba(106,165,255,.55);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(106,165,255,.12);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .preview{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 10px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 14px;&ndash;&gt;-->
+<!--&lt;!&ndash;      overflow:hidden;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(0,0,0,.20);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    iframe{&ndash;&gt;-->
+<!--&lt;!&ndash;      width:100%;&ndash;&gt;-->
+<!--&lt;!&ndash;      height: 820px;&ndash;&gt;-->
+<!--&lt;!&ndash;      border:0;&ndash;&gt;-->
+<!--&lt;!&ndash;      background:white;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    .note{&ndash;&gt;-->
+<!--&lt;!&ndash;      color:var(&#45;&#45;muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      line-height: 1.4;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 10px;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;    pre{&ndash;&gt;-->
+<!--&lt;!&ndash;      margin:10px 0 0 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding:12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(0,0,0,.25);&ndash;&gt;-->
+<!--&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text);&ndash;&gt;-->
+<!--&lt;!&ndash;      overflow:auto;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 12px;&ndash;&gt;-->
+<!--&lt;!&ndash;      line-height: 1.35;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;  </style>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;  <div class="wrap">&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="header">&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="title">&ndash;&gt;-->
+<!--&lt;!&ndash;        <h1>Technology Gap Analysis Report</h1>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="sub">&ndash;&gt;-->
+<!--&lt;!&ndash;          Generated: {{ generated_at or "—" }}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if duration_seconds is defined %}&ndash;&gt;-->
+<!--&lt;!&ndash;            · Duration: {{ duration_seconds }}s&ndash;&gt;-->
+<!--&lt;!&ndash;          {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      {% if status == "failed" %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="badge fail">Status: <b>Failed</b></div>&ndash;&gt;-->
+<!--&lt;!&ndash;      {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="badge ok">Status: <b>Completed</b></div>&ndash;&gt;-->
+<!--&lt;!&ndash;      {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="card">&ndash;&gt;-->
+<!--&lt;!&ndash;      <h2>Report Summary</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="kv">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="k">Competitor</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">{{ competitor }}</div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div class="k">Baseline</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if baseline %}&ndash;&gt;-->
+<!--&lt;!&ndash;            {{ baseline }}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;            Not used&ndash;&gt;-->
+<!--&lt;!&ndash;          {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div class="k">Outputs</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">&ndash;&gt;-->
+<!--&lt;!&ndash;          {% set outputs = [] %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.docx %}{% set _ = outputs.append("Word") %}{% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.pptx %}{% set _ = outputs.append("PowerPoint") %}{% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.md %}{% set _ = outputs.append("Markdown") %}{% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.html %}{% set _ = outputs.append("HTML") %}{% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;          {{ outputs|join(", ") if outputs else "None detected" }}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      <div class="actions">&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated and generated.docx %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <a class="btn primary" href="{{ generated.docx }}">Download Word (.docx)</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated and generated.pptx %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <a class="btn" href="{{ generated.pptx }}">Download PowerPoint (.pptx)</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated and generated.md %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <a class="btn" href="{{ generated.md }}">Download Markdown (.md)</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if generated and generated.html %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <a class="btn" href="{{ generated.html }}">Open HTML report</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <a class="btn" href="{{ url_for('index') }}">Run another analysis</a>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      <div class="note">&ndash;&gt;-->
+<!--&lt;!&ndash;        The preview below is rendered from the generated HTML report.&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="card">&ndash;&gt;-->
+<!--&lt;!&ndash;      <h2>Report Details</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="kv">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="k">Exit code</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">{{ exit_code }}</div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div class="k">Preview</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="v">&ndash;&gt;-->
+<!--&lt;!&ndash;          {% if generated and generated.html %}&ndash;&gt;-->
+<!--&lt;!&ndash;            Available&ndash;&gt;-->
+<!--&lt;!&ndash;          {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;            Not available (HTML output not detected)&ndash;&gt;-->
+<!--&lt;!&ndash;          {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      {% if status == "failed" %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="note" style="margin-top:12px;">&ndash;&gt;-->
+<!--&lt;!&ndash;          Diagnostic output is shown below because the run did not complete successfully.&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if stderr_tail %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <pre><b>stderr</b>&ndash;&gt;-->
+<!--&lt;!&ndash;{{ stderr_tail }}</pre>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;        {% if stdout_tail %}&ndash;&gt;-->
+<!--&lt;!&ndash;          <pre><b>stdout</b>&ndash;&gt;-->
+<!--&lt;!&ndash;{{ stdout_tail }}</pre>&ndash;&gt;-->
+<!--&lt;!&ndash;        {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;      {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="card">&ndash;&gt;-->
+<!--&lt;!&ndash;      <h2>Report Preview</h2>&ndash;&gt;-->
+
+<!--&lt;!&ndash;      {% if generated and generated.html %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="preview">&ndash;&gt;-->
+<!--&lt;!&ndash;          <iframe src="{{ generated.html }}"></iframe>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      {% else %}&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="note">&ndash;&gt;-->
+<!--&lt;!&ndash;          A preview is not available because the HTML report path was not provided to this template.&ndash;&gt;-->
+<!--&lt;!&ndash;          Ensure your Flask route passes <code>generated["html"]</code>.&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      {% endif %}&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  </div>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+
+
+
+<!--&lt;!&ndash;&lt;!&ndash;<!doctype html>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<html lang="en">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<head>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <meta charset="utf-8" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <meta name="viewport" content="width=device-width,initial-scale=1" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <title>Technology Gap Analysis Report</title>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <style>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    :root{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;bg:#0b1220;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;card:#0f1b33;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;text:#e7eefc;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;muted:#a9b7d0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;line:rgba(231,238,252,.14);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;accent:#6aa5ff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;accent2:#7ee0b8;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;danger:#ff6a6a;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    *{box-sizing:border-box}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    body{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin:0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: radial-gradient(1000px 600px at 10% 0%, rgba(106,165,255,.18), transparent 60%),&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                  radial-gradient(900px 550px at 90% 20%, rgba(126,224,184,.14), transparent 55%),&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                  var(&#45;&#45;bg);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color:var(&#45;&#45;text);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .wrap{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      max-width: 980px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin: 28px auto 48px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 0 18px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .header{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:flex;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      align-items:flex-start;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      justify-content:space-between;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      gap:16px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-bottom: 16px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .title h1{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin:0 0 6px 0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 22px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-weight: 700;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      letter-spacing: .2px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .title .sub{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color:var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 13px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      line-height: 1.35;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .badge{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:inline-flex;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      align-items:center;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      gap:8px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding:10px 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: rgba(255,255,255,.03);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      min-width: 160px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      justify-content:center;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 13px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      white-space:nowrap;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .badge.ok b{color:var(&#45;&#45;accent2)}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .badge.fail b{color:var(&#45;&#45;danger)}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .card{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius: 16px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: rgba(255,255,255,.03);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      box-shadow: 0 10px 24px rgba(0,0,0,.22);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 16px 16px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-top: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .card h2{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin:0 0 10px 0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 15px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      letter-spacing: .2px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .kv{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:grid;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      grid-template-columns: 190px 1fr;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      gap:10px 16px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      align-items:start;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 13px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .k{color:var(&#45;&#45;muted)}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .v{color:var(&#45;&#45;text); word-break:break-word}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .actions{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:flex;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      flex-wrap:wrap;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      gap:10px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-top: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .btn{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:inline-flex;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      align-items:center;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      justify-content:center;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding:10px 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: rgba(255,255,255,.04);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;text);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      text-decoration:none;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 13px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      transition: transform .05s ease, border-color .12s ease, background .12s ease;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .btn:hover{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-color: rgba(106,165,255,.45);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: rgba(106,165,255,.10);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .btn.primary{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-color: rgba(106,165,255,.55);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: rgba(106,165,255,.12);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .preview{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-top: 10px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius: 14px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      overflow:hidden;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: rgba(0,0,0,.20);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    iframe{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      width:100%;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      height: 820px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background:white;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .note{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color:var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      line-height: 1.4;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-top: 10px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    pre{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin:10px 0 0 0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding:12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: rgba(0,0,0,.25);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;text);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      overflow:auto;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      line-height: 1.35;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  </style>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</head>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;<body>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <div class="wrap">&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    <div class="header">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="title">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <h1>Technology Gap Analysis Report</h1>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="sub">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          Generated: {{ generated_at or "—" }}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% if duration_seconds is defined %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            · Duration: {{ duration_seconds }}s&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;      {% if status == "failed" %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="badge fail">Status: <b>Failed</b></div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      {% else %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="badge ok">Status: <b>Completed</b></div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    <div class="card">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <h2>Report Summary</h2>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="kv">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="k">Competitor</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="v">{{ competitor }}</div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="k">Baseline</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="v">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% if baseline %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            {{ baseline }}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% else %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            Not used&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="k">Outputs</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="v">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% set outputs = [] %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% if generated and generated.docx %}{% set _ = outputs.append("Word") %}{% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% if generated and generated.pptx %}{% set _ = outputs.append("PowerPoint") %}{% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% if generated and generated.md %}{% set _ = outputs.append("Markdown") %}{% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% if generated and generated.html %}{% set _ = outputs.append("HTML") %}{% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {{ outputs|join(", ") if outputs else "None detected" }}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="actions">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% if generated and generated.docx %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <a class="btn primary" href="{{ generated.docx }}">Download Word (.docx)</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% if generated and generated.pptx %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <a class="btn" href="{{ generated.pptx }}">Download PowerPoint (.pptx)</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% if generated and generated.md %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <a class="btn" href="{{ generated.md }}">Download Markdown (.md)</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% if generated and generated.html %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <a class="btn" href="{{ generated.html }}">Open HTML report</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <a class="btn" href="{{ url_for('index') }}">Run another analysis</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="note">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        The preview below is rendered from the generated HTML report.&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    <div class="card">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <h2>Report Details</h2>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="kv">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="k">Exit code</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="v">{{ exit_code }}</div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="k">Preview</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="v">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% if generated and generated.html %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            Available&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% else %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            Not available (HTML output not detected)&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;      {% if status == "failed" %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="note" style="margin-top:12px;">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          Diagnostic output is shown below because the run did not complete successfully.&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% if stderr_tail %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <pre><b>stderr</b>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;{{ stderr_tail }}</pre>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% if stdout_tail %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <pre><b>stdout</b>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;{{ stdout_tail }}</pre>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    <div class="card">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <h2>Report Preview</h2>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;      {% if generated and generated.html %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="preview">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <iframe src="{{ generated.html }}"></iframe>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      {% else %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="note">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          A preview is not available because the HTML report path was not provided to this template.&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          Ensure your Flask route passes <code>generated["html"]</code>.&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</body>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</html>&ndash;&gt;&ndash;&gt;-->
+
+
+
+
+<!--&lt;!&ndash;&lt;!&ndash;&lt;!&ndash; templates/result.html &ndash;&gt;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<!doctype html>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<html lang="en">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<head>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <meta charset="utf-8" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <meta name="viewport" content="width=device-width,initial-scale=1" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <title>Technology Gap Analysis Report</title>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <style>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    :root{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;ink:#111827;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;muted:#6b7280;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;line:#e5e7eb;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;bg:#ffffff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;card:#f9fafb;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;accent:#0f172a;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      &#45;&#45;shadow: 0 10px 20px rgba(0,0,0,.06);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    *{ box-sizing:border-box; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    body{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin:0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background:var(&#45;&#45;bg);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color:var(&#45;&#45;ink);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-family: "Calibri","Segoe UI", Arial, sans-serif;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      line-height:1.45;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .page{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      max-width: 1100px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin: 28px auto;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 0 18px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    /* Top bar */&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .topbar{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:flex;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      align-items:flex-start;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      justify-content:space-between;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      gap: 16px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 18px 18px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius:14px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: #fff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .titleblock h1{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin:0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 26px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      letter-spacing:.2px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;accent);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .titleblock .subtitle{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-top:6px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 14px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .badge{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:inline-flex;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      align-items:center;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      gap:8px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 8px 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius: 999px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      white-space:nowrap;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: #fff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    /* Layout */&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .grid{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:grid;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      grid-template-columns: 380px 1fr;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      gap: 18px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-top: 18px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    @media (max-width: 980px){&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      .grid{ grid-template-columns: 1fr; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    .card{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius:14px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: #fff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      overflow:hidden;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .card .hd{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 12px 14px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-bottom: 1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: var(&#45;&#45;card);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-weight: 700;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;accent);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 14px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .card .bd{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 14px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    /* Metadata table */&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    table.meta{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      width:100%;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-collapse:separate;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-spacing:0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 13px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    table.meta td{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 10px 10px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-bottom: 1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      vertical-align: top;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    table.meta tr:last-child td{ border-bottom:0; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    table.meta td.k{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      width: 38%;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-weight: 600;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: #fff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    table.meta td.v{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;ink);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-weight: 500;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      word-break: break-word;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    /* Actions */&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .actions{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:flex;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      flex-wrap:wrap;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      gap:10px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-top: 6px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .btn{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:inline-flex;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      align-items:center;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      justify-content:center;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 10px 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-radius: 10px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border:1px solid var(&#45;&#45;line);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      text-decoration:none;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;accent);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background:#fff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 13px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-weight: 600;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      transition: transform .06s ease, box-shadow .06s ease;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .btn:hover{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      box-shadow: 0 10px 18px rgba(0,0,0,.07);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      transform: translateY(-1px);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .btn.primary{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: var(&#45;&#45;accent);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border-color: var(&#45;&#45;accent);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color:#fff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .btn.muted{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: #fff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    /* Report preview */&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .preview{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .preview iframe{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      width: 100%;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      height: 76vh;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      border: 0;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      display:block;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      background: #fff;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .empty{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      padding: 18px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 14px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    /* Footer */&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .footer{&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      margin-top: 16px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      color: var(&#45;&#45;muted);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      font-size: 12px;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      text-align:center;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  </style>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</head>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;<body>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <div class="page">&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    <div class="topbar">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="titleblock">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <h1>Technology Gap Analysis Report</h1>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="subtitle">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          Structured competitive comparison generated from the selected company document and referenced websites.&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="badge">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% if generated_at %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          Generated: {{ generated_at }}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% else %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          Report generated successfully&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    <div class="grid">&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;      &lt;!&ndash; Left: cover-style metadata + actions &ndash;&gt;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="card">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="hd">Report Details</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="bd">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <table class="meta" role="presentation" aria-label="Report details">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            <tr>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              <td class="k">Competitor</td>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              <td class="v">{{ competitor }}</td>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            </tr>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;            {% if baseline %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            <tr>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              <td class="k">Baseline</td>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              <td class="v">{{ baseline }}</td>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            </tr>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            {% endif %}&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;            <tr>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              <td class="k">Input File</td>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              <td class="v">{{ file_path }}</td>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            </tr>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;            {% if report_folder %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            <tr>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              <td class="k">Report Folder</td>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              <td class="v">{{ report_folder }}</td>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            </tr>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          </table>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;          {% if generated and (generated.html or generated.docx or generated.pptx or generated.md) %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            <div style="margin-top:14px; font-weight:700; color:var(&#45;&#45;accent); font-size:14px;">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              Outputs&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            <div class="actions" style="margin-top:10px;">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              {% if generated.html %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                <a class="btn primary" href="{{ generated.html }}" target="_blank" rel="noopener">Open Report (HTML)</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              {% if generated.docx %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                <a class="btn" href="{{ generated.docx }}" target="_blank" rel="noopener">Download Word</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              {% if generated.pptx %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                <a class="btn" href="{{ generated.pptx }}" target="_blank" rel="noopener">Download PowerPoint</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              {% if generated.md %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                <a class="btn muted" href="{{ generated.md }}" target="_blank" rel="noopener">View Markdown</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;              {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          {% endif %}&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;          <div class="actions" style="margin-top:14px;">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            <a class="btn muted" href="/">Run Another Analysis</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;      &lt;!&ndash; Right: embedded preview of the generated HTML report (professional “report-like” experience) &ndash;&gt;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <div class="card preview">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        <div class="hd">Report Preview</div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        {% if generated and generated.html %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          &lt;!&ndash; Preview the generated report HTML &ndash;&gt;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <iframe src="{{ generated.html }}" title="Technology Gap Analysis Report Preview"></iframe>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% else %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          <div class="empty">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            A preview is not available because the HTML report path was not provided to this template.&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            If you want this preview, ensure your Flask route passes <code>generated.html</code> (a URL to the saved HTML).&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;          </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    <div class="footer">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      Confidential – for internal use only.&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  </div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</body>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</html>&ndash;&gt;&ndash;&gt;-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--&lt;!&ndash;&lt;!&ndash;<!doctype html>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<html>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<head>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <meta charset="utf-8" />&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <title>Technology Gap Analysis - Result</title>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <style>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    body { font-family: Arial, sans-serif; margin: 16px; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .row { margin: 6px 0; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    .files a { display: inline-block; margin-right: 12px; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    iframe { width: 100%; height: 80vh; border: 1px solid #ccc; margin-top: 12px; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    pre { background: #f6f6f6; padding: 10px; border: 1px solid #ddd; overflow: auto; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  </style>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</head>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<body>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  <h2>Technology Gap Analysis Report</h2>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  <div class="row"><b>Competitor:</b> {{ competitor }}</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  {% if baseline %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <div class="row"><b>Baseline:</b> {{ baseline }}</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <div class="row"><b>File:</b> {{ file_path }}</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <div class="row"><b>Exit code:</b> {{ exit_code }}</div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  <h3>Generated Files</h3>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <div class="files">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    {% if published.files.html %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <a href="{{ published.files.html.url }}" target="_blank">Open HTML</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    {% if published.files.docx %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <a href="{{ published.files.docx.url }}" target="_blank">Download Word (.docx)</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    {% if published.files.pptx %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <a href="{{ published.files.pptx.url }}" target="_blank">Download PowerPoint (.pptx)</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    {% if published.files.md %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;      <a href="{{ published.files.md.url }}" target="_blank">Open Markdown (.md)</a>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    {% endif %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  </div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  {% if html_url %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <h3>Preview (HTML)</h3>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <iframe src="{{ html_url }}"></iframe>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  {% else %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <p><i>No HTML report found to preview.</i></p>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  {% endif %}&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  <h3>Command</h3>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <pre>{{ cmd }}</pre>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  <h3>Last Output Lines</h3>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  <pre>{{ stdout_tail }}</pre>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  {% if stderr_tail %}&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <h3>Last Error Lines</h3>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <pre>{{ stderr_tail }}</pre>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;  {% endif %}&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;  <p><a href="/">Run another</a></p>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;</body>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</html>&ndash;&gt;&ndash;&gt;-->
