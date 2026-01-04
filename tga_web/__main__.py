@@ -4,7 +4,7 @@ if __name__ == "__main__":
     app = create_app()
     app.run(host=app.config["HOST"], port=app.config["PORT"], debug=app.config["DEBUG"])
 
-
+#############################
 #
 # Key design patterns used
 # •	Application Factory: create_app() builds the app and dependencies.
