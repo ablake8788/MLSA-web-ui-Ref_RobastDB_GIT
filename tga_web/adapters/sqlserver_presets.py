@@ -1,6 +1,3 @@
-#### sqlserver_presets.py
-##
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,7 +11,14 @@ import pyodbc
 class Preset:
     preset_id: int
     companyname: str
+
+    # This is what your existing dropdown likely displays today.
+    # We will populate THIS with the combined label.
     preset_display_name: str
+
+    # Keep original DB value here so you don't lose it.
+    preset_display_name_raw: str
+
     competitor: str
     baseline: str
     instruction_preset: str
@@ -23,6 +27,17 @@ class Preset:
     web: str
     processor: str
     is_active: bool
+
+    @property
+    def display_label(self) -> str:
+        c = (self.companyname or "").strip()
+        n = (self.preset_display_name_raw or "").strip()
+        if c and n:
+            return f"{c} - {n}"
+        return c or n or f"Preset {self.preset_id}"
+
+    def __str__(self) -> str:
+        return self.display_label
 
 
 class SqlServerPresetRepository:
@@ -58,7 +73,6 @@ class SqlServerPresetRepository:
             f"DATABASE={self._database}",
         ]
 
-        # SQL auth if username provided; else Windows integrated auth
         if self._username:
             parts.append(f"UID={self._username}")
             parts.append(f"PWD={self._password}")
@@ -74,6 +88,14 @@ class SqlServerPresetRepository:
     @staticmethod
     def _get(r, name: str, default=""):
         return getattr(r, name, default)
+
+    @staticmethod
+    def _make_display_label(companyname: str, preset_display_name_raw: str, preset_id: int) -> str:
+        c = (companyname or "").strip()
+        n = (preset_display_name_raw or "").strip()
+        if c and n:
+            return f"{c} - {n}"
+        return c or n or f"Preset {preset_id}"
 
     def get_active_presets(self) -> List[Preset]:
         q = f"""
@@ -91,7 +113,7 @@ class SqlServerPresetRepository:
             is_active
         FROM {self.table_name}
         WHERE is_active = 1
-        ORDER BY preset_display_name
+        ORDER BY companyname, preset_display_name
         """
 
         with self._connect() as conn:
@@ -100,11 +122,20 @@ class SqlServerPresetRepository:
 
         out: List[Preset] = []
         for r in rows:
+            preset_id = int(self._get(r, "preset_id", 0))
+            companyname = str(self._get(r, "companyname", "") or "")
+            preset_display_name_raw = str(self._get(r, "preset_display_name", "") or "")
+
+            # IMPORTANT: set preset_display_name to the combined label
+            # so dropdowns that already display preset_display_name will show the combined string.
+            combined = self._make_display_label(companyname, preset_display_name_raw, preset_id)
+
             out.append(
                 Preset(
-                    preset_id=int(self._get(r, "preset_id", 0)),
-                    companyname=str(self._get(r, "companyname", "") or ""),
-                    preset_display_name=str(self._get(r, "preset_display_name", "") or ""),
+                    preset_id=preset_id,
+                    companyname=companyname,
+                    preset_display_name=combined,            # <- dropdown shows this
+                    preset_display_name_raw=preset_display_name_raw,  # <- original DB value preserved
                     competitor=str(self._get(r, "competitor", "") or ""),
                     baseline=str(self._get(r, "baseline", "") or ""),
                     instruction_preset=str(self._get(r, "instruction_preset", "") or ""),
@@ -115,6 +146,7 @@ class SqlServerPresetRepository:
                     is_active=bool(self._get(r, "is_active", True)),
                 )
             )
+
         return out
 
     def get_preset(self, preset_id: int) -> Optional[Preset]:
@@ -143,10 +175,15 @@ class SqlServerPresetRepository:
         if not r:
             return None
 
+        companyname = str(self._get(r, "companyname", "") or "")
+        preset_display_name_raw = str(self._get(r, "preset_display_name", "") or "")
+        combined = self._make_display_label(companyname, preset_display_name_raw, preset_id)
+
         return Preset(
             preset_id=int(self._get(r, "preset_id", 0)),
-            companyname=str(self._get(r, "companyname", "") or ""),
-            preset_display_name=str(self._get(r, "preset_display_name", "") or ""),
+            companyname=companyname,
+            preset_display_name=combined,                 # <- combined for UI
+            preset_display_name_raw=preset_display_name_raw,
             competitor=str(self._get(r, "competitor", "") or ""),
             baseline=str(self._get(r, "baseline", "") or ""),
             instruction_preset=str(self._get(r, "instruction_preset", "") or ""),
@@ -157,7 +194,6 @@ class SqlServerPresetRepository:
             is_active=bool(self._get(r, "is_active", True)),
         )
 
-###############
     def get_distinct_instruction_presets(self) -> list[str]:
         sql = f"""
         SELECT DISTINCT instruction_preset

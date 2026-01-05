@@ -6,6 +6,8 @@ if __name__ == "__main__":
 
 #############################
 #
+# PS C:\Ara\Python\MLSA gap analysis Ref\MLSA_web_ui Ref_RobastDB_GIT>
+# 	python -m tga_web
 
 # Key design patterns used
 # •	Application Factory: create_app() builds the app and dependencies.
