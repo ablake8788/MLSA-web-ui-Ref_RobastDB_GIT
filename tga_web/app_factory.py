@@ -11,6 +11,7 @@ from tga_web.web.routes import create_blueprint
 from tga_web.adapters.sqlserver_presets import SqlServerPresetRepository
 
 
+
 def create_app() -> Flask:
     ini = IniConfig.from_env_or_default()
     settings = ini.load_settings()

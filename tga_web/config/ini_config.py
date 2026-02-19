@@ -5,7 +5,7 @@ from configparser import ConfigParser
 from dataclasses import dataclass
 from pathlib import Path
 
-INI_DEFAULT_NAME = "MLSA_GapAnalysisRefDB.ini"
+INI_DEFAULT_NAME = "TIS_web_ui_Ref_RobastDB_GIT.ini"
 
 
 @dataclass(frozen=True)
